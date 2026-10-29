@@ -1,28 +1,60 @@
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Welcome from './pages/Welcome';
+import { onAuthStateChanged, type User } from 'firebase/auth';
+import { auth } from './lib/firebase';
 import Login from './pages/Login';
-import DashboardLayout from './layouts/DashboardLayout';
 import Dashboard from './pages/Dashboard';
+import Welcome from './pages/Welcome';
+import CodeReview from './pages/CodeReview';
+import DashboardLayout from './layouts/DashboardLayout';
 
-export default function App() {
+export function App() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#07090e] flex items-center justify-center text-cyan-400 font-mono text-sm">
+        Initializing DevPilot AI...
+      </div>
+    );
+  }
+
   return (
     <BrowserRouter>
       <Routes>
-        {/* 1. Public Welcome / Landing Page */}
+        {/* Welcome Landing Page */}
         <Route path="/" element={<Welcome />} />
 
-        {/* 2. Login & Sign Up Page */}
-        <Route path="/login" element={<Login />} />
+        {/* Authentication */}
+        <Route 
+          path="/login" 
+          element={user ? <Navigate to="/dashboard" replace /> : <Login />} 
+        />
 
-        {/* 3. Authenticated Developer Workspace */}
-        <Route path="/dashboard" element={<DashboardLayout />}>
+        {/* Dashboard Layout with Nested Child Routes */}
+        <Route
+          path="/dashboard"
+          element={user ? <DashboardLayout /> : <Navigate to="/login" replace />}
+        >
           <Route index element={<Dashboard />} />
-          {/* AI Tools ke baki routes agle phases me yahan aayenge */}
+          <Route path="code-review" element={<CodeReview />} />
         </Route>
 
-        {/* 4. Unknown routes redirect to Welcome */}
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
 }
+
+export default App;

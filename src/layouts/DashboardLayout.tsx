@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { signOut } from 'firebase/auth';
+import { auth } from '../lib/firebase';
 import { 
   LayoutDashboard, 
   Code2, 
@@ -34,8 +36,13 @@ export default function DashboardLayout() {
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },
   ];
 
-  const handleLogout = () => {
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate('/login');
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
   };
 
   return (
@@ -155,7 +162,7 @@ export default function DashboardLayout() {
           </div>
         )}
 
-        {/* Inner Page View (Outlet) */}
+        {/* Inner Page View */}
         <main className="flex-1 p-6 overflow-y-auto">
           <Outlet />
         </main>
