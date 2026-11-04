@@ -9,7 +9,9 @@ import {
   FileCheck, 
   FolderKanban, 
   BookOpen, 
-  Cpu, 
+  Cpu,
+  PlaySquare, 
+  MessageSquareCode, 
   Gauge, 
   Settings, 
   LogOut, 
@@ -30,8 +32,10 @@ export default function DashboardLayout() {
     { name: 'Bug Detective', path: '/dashboard/bug-detective', icon: Bug },
     { name: 'Test Generator', path: '/dashboard/test-generator', icon: FileCheck },
     { name: 'Projects', path: '/dashboard/projects', icon: FolderKanban },
-    { name: 'Interview Prep', path: '/dashboard/interview', icon: BookOpen },
+    { name: 'Interview Prep', path: '/dashboard/interview-prep', icon: BookOpen },
     { name: 'DSA Practice', path: '/dashboard/dsa', icon: Cpu },
+    { name: 'Code Playground', path: '/dashboard/playground', icon: PlaySquare },
+    { name: 'Dev Chat AI', path: '/dashboard/chat', icon: MessageSquareCode },
     { name: 'Performance', path: '/dashboard/performance', icon: Gauge },
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },
   ];
@@ -51,7 +55,6 @@ export default function DashboardLayout() {
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 border-r border-slate-800/80 bg-slate-950/95 p-4 justify-between shrink-0">
         <div className="space-y-6">
-          {/* Logo */}
           <div className="flex items-center gap-3 px-3 py-2">
             <div className="h-9 w-9 rounded-xl bg-indigo-600/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
               <Terminal className="w-5 h-5" />
@@ -62,7 +65,6 @@ export default function DashboardLayout() {
             </div>
           </div>
 
-          {/* Navigation Links */}
           <nav className="space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -87,7 +89,6 @@ export default function DashboardLayout() {
           </nav>
         </div>
 
-        {/* User Profile & Logout */}
         <div className="pt-4 border-t border-slate-800/80 space-y-2">
           <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-slate-900/60 border border-slate-800">
             <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white font-bold flex items-center justify-center text-xs">
@@ -110,8 +111,6 @@ export default function DashboardLayout() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        
-        {/* Top Header */}
         <header className="h-16 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-40">
           <div className="flex items-center gap-3">
             <button
@@ -142,7 +141,6 @@ export default function DashboardLayout() {
           </div>
         </header>
 
-        {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
           <div className="md:hidden border-b border-slate-800 bg-slate-950 p-4 space-y-2">
             {navItems.map((item) => {
@@ -162,7 +160,6 @@ export default function DashboardLayout() {
           </div>
         )}
 
-        {/* Inner Page View */}
         <main className="flex-1 p-6 overflow-y-auto">
           <Outlet />
         </main>

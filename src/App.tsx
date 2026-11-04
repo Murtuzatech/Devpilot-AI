@@ -1,60 +1,49 @@
-import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth } from './lib/firebase';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Welcome from './pages/Welcome';
-import CodeReview from './pages/CodeReview';
 import DashboardLayout from './layouts/DashboardLayout';
+import ProtectedRoute from './components/ProtectedRoute';
 
-export function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+// Pages
+import Dashboard from './pages/Dashboard';
+import CodeReview from './pages/CodeReview';
+import BugDetective from './pages/BugDetective';
+import TestGenerator from './pages/TestGenerator';
+import Projects from './pages/Projects';
+import InterviewPrep from './pages/InterviewPrep';
+import DSAPractice from './pages/DSAPractice';
+import CodePlayground from './pages/CodePlayground';
+import DevChatAI from './pages/DevChatAI';
+import Performance from './pages/Performance';
+import Settings from './pages/Setting';
+import Login from './pages/Login';
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#07090e] flex items-center justify-center text-cyan-400 font-mono text-sm">
-        Initializing DevPilot AI...
-      </div>
-    );
-  }
-
+export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Welcome Landing Page */}
-        <Route path="/" element={<Welcome />} />
+        {/* Public Auth Route */}
+        <Route path="/login" element={<Login />} />
 
-        {/* Authentication */}
-        <Route 
-          path="/login" 
-          element={user ? <Navigate to="/dashboard" replace /> : <Login />} 
-        />
-
-        {/* Dashboard Layout with Nested Child Routes */}
-        <Route
-          path="/dashboard"
-          element={user ? <DashboardLayout /> : <Navigate to="/login" replace />}
-        >
-          <Route index element={<Dashboard />} />
-          <Route path="code-review" element={<CodeReview />} />
+        {/* Protected Dashboard Routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="code-review" element={<CodeReview />} />
+            <Route path="bug-detective" element={<BugDetective />} />
+            <Route path="test-generator" element={<TestGenerator />} />
+            <Route path="projects" element={<Projects />} />
+            <Route path="interview-prep" element={<InterviewPrep />} />
+            <Route path="dsa" element={<DSAPractice />} />
+            <Route path="playground" element={<CodePlayground />} />
+            <Route path="chat" element={<DevChatAI />} />
+            <Route path="dev-chat" element={<DevChatAI />} />
+            <Route path="performance" element={<Performance />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
         </Route>
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Fallback Redirection */}
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
   );
 }
-
-export default App;

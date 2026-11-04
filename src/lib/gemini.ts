@@ -1,6 +1,7 @@
 const KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const MODEL = 'gemini-3.1-flash-lite';
 
+// Types for AI Code Review
 export interface ReviewResult {
   score: number;
   summary: string;
@@ -13,6 +14,16 @@ export interface ReviewResult {
   refactoredCode: string;
 }
 
+// Types for Bug Detective
+export interface BugDetectiveResult {
+  errorType: string;
+  rootCause: string;
+  explanation: string;
+  fixedCode: string;
+  preventionTips: string[];
+}
+
+// 1. AI Code Review Function
 export async function analyzeCodeWithGemini(code: string, language: string): Promise<ReviewResult> {
   if (!KEY) {
     throw new Error("Gemini API Key is missing. Check your .env file.");
@@ -76,5 +87,67 @@ ${code}
   } catch (err) {
     console.error("Failed to parse AI response:", rawText);
     throw new Error("Invalid response format received from AI.");
+  }
+}
+
+// 2. Bug Detective Function
+export async function detectAndFixBug(
+  code: string,
+  errorMessage: string,
+  language: string
+): Promise<BugDetectiveResult> {
+  if (!KEY) {
+    throw new Error("Gemini API Key missing. Please check your .env file.");
+  }
+
+  const prompt = `
+You are an Elite Debugging Engineer and Systems Architect.
+Analyze the provided ${language} broken code and the corresponding runtime/compile error or stack trace.
+Identify the root cause, fix the issue completely, and explain how to prevent it.
+
+You must respond ONLY with a raw, valid JSON object matching this schema. Do NOT use markdown code blocks, do NOT write \`\`\`json, and do NOT add text outside the JSON.
+
+JSON Schema:
+{
+  "errorType": "Specific error name (e.g., NullPointerException, TypeError, MemoryLeak)",
+  "rootCause": "Clear 1-sentence technical explanation of why the crash happened",
+  "explanation": "Detailed step-by-step diagnostic breakdown of the flaw",
+  "fixedCode": "Clean, complete, production-ready corrected code",
+  "preventionTips": [
+    "Actionable tip to avoid this class of error in the future"
+  ]
+}
+
+Error Message / Stack Trace:
+${errorMessage || "No explicit error provided, perform proactive bug inspection."}
+
+Broken Code to Debug:
+${code}
+`;
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${KEY}`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }]
+    })
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.error?.message || `API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  const cleanJson = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+
+  try {
+    return JSON.parse(cleanJson) as BugDetectiveResult;
+  } catch (err) {
+    console.error("Bug Detective parse error:", rawText);
+    throw new Error("Failed to parse diagnostic result from AI.");
   }
 }

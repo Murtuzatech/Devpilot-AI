@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@google/genai": "^2.32.0",
+    "@google/generative-ai": "^0.24.1",
+    "@monaco-editor/react": "^4.7.0",
     "@tailwindcss/vite": "^4.3.3",
     "lucide-react": "^1.62.0",
     "prismjs": "^1.30.0",
